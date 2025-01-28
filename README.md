@@ -100,20 +100,20 @@ Podrás encontrarlo en el archivo `src/main/java/com/example/McwServlet.java`.
 ```java
 switch (path) {
     case "/formtoken":
-		  // Procesando datos POST y almacenándolos en un Map
-		  requestBody = mcwController.readJsonBody(request);
+      // Procesando datos POST y almacenándolos en un Map
+      requestBody = mcwController.readJsonBody(request);
       ObjectMapper objectMapper = new ObjectMapper();
       Map<String, String> parameters = objectMapper.readValue(requestBody, 
       new TypeReference<Map<String, String>>() {});
 
-		  //Obtener PublicKey
-		  String publicKey = properties.getProperty("PUBLIC_KEY");
+      //Obtener PublicKey
+      String publicKey = properties.getProperty("PUBLIC_KEY");
 
-		  //Obtenemos el FormToken generado
-		  String formToken = mcwController.generateFormToken(parameters);
+      //Obtenemos el FormToken generado
+      String formToken = mcwController.generateFormToken(parameters);
 				
-		  // Crear la respuesta
-		  jsonResponse = new JSONObject();
+      // Crear la respuesta
+      jsonResponse = new JSONObject();
       jsonResponse.put("formToken", formToken);
       jsonResponse.put("publicKey", publicKey);        
       response.setContentType("application/json");
@@ -146,20 +146,20 @@ Se valida que la firma recibida es correcta. Para la validación de los datos re
 ```java
     case "/validate":
 
-		String HMAC_SHA256 = properties.getProperty("HMAC_SHA256");
-		...
-		...
-		// Válida que la respuesta sea íntegra comprando el hash recibido en el 'kr-hash' con el generado con el 'kr-answer'
-		if (!mcwController.checkHash(krHash, HMAC_SHA256, krAnswer)){
-			response.setContentType("application/json");
-        		response.getWriter().write("false");
-			break;
-		}
-
+	String HMAC_SHA256 = properties.getProperty("HMAC_SHA256");
+	...
+	...
+	// Válida que la respuesta sea íntegra comprando el hash recibido en el 'kr-hash' con el generado con el 'kr-answer'
+	if (!mcwController.checkHash(krHash, HMAC_SHA256, krAnswer)){
 		response.setContentType("application/json");
-    response.getWriter().write("true");
-
+		response.getWriter().write("false");
 		break;
+	}
+
+	response.setContentType("application/json");
+	response.getWriter().write("true");
+
+	break;
 ```
 
 El servidor devuelve un valor `true` verificando si los datos de la transacción coinciden con la firma recibida. Se confirma que los datos son enviados desde el servidor de Izipay.
@@ -182,26 +182,25 @@ Podrás encontrarlo en el archivo `src/main/java/com/example/serverpaymentform/c
 
 ```java
 case "/ipn":
-    ...
-    ...
-		String PASSWORD = properties.getProperty("PASSWORD");
+    	...
+    	...
+	String PASSWORD = properties.getProperty("PASSWORD");
 
-		// Válida que la respuesta sea íntegra comprando el hash recibido en el 'kr-hash' con el generado con el 'kr-answer'
-		if (!mcwController.checkHash(krHash, PASSWORD, krAnswer)){
-			System.out.println("Notification Error");
-			break;
-		}
-    ...
-    ...
-		// Verifica el orderStatus PAID
-		String orderStatus = jsonResponse.getString("orderStatus");
-		String orderId = jsonResponse.getJSONObject("orderDetails").getString("orderId");
-		String uuid = transactions.getString("uuid");
-		
-		// Retornando el OrderStatus
-		response.getWriter().write("OK! Order Status is " + orderStatus);
-
+	// Válida que la respuesta sea íntegra comprando el hash recibido en el 'kr-hash' con el generado con el 'kr-answer'
+	if (!mcwController.checkHash(krHash, PASSWORD, krAnswer)){
+		System.out.println("Notification Error");
 		break;
+	}
+    	...
+    	...
+	// Verifica el orderStatus PAID
+	String orderStatus = jsonResponse.getString("orderStatus");
+	String orderId = jsonResponse.getJSONObject("orderDetails").getString("orderId");
+	String uuid = transactions.getString("uuid");
+		
+	// Retornando el OrderStatus
+	response.getWriter().write("OK! Order Status is " + orderStatus);
+	break;
 ```
 
 Podrás acceder a esta API a través:
